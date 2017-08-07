@@ -1,4 +1,4 @@
-package com.example.laptop.test1;
+package com.dzdy.cryptopia;
 
 import org.junit.Test;
 
