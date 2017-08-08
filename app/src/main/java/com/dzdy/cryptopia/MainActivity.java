@@ -1,8 +1,8 @@
 package com.dzdy.cryptopia;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -24,18 +25,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public RequestQueue requestQueue;
 
     private Adapter mAdapter;
-
-    public static final List<String> DEFAULT_PAIRS = Collections.unmodifiableList(Arrays.asList("LTC_BTC", "ETH_BTC"));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +40,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            }
-        });
 
         final SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -90,9 +78,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshData() {
         final TextView timeTextView = (TextView) findViewById(R.id.timeTextView);
-        timeTextView.setText(getResources().getString(R.string.time_prefix, new java.util.Date().toString()));
+        timeTextView.setText(getString(R.string.time_prefix, new java.util.Date().toString()));
 
-        List<String> chosenPairs = getChosenPairs();
+        SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
+        List<String> chosenPairs = StoredData.getChosenPairs(pair_prefs);
 
         if (mAdapter == null) {
             RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerList);
@@ -128,29 +117,16 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // TODO add error message toast
+                        CharSequence err_msg = getString(R.string.network_err);
+                        Toast.makeText(getApplicationContext(), err_msg, Toast.LENGTH_SHORT).show();
                         error.printStackTrace();
                     }
                 });
         requestQueue.add(jsObjRequest);
     }
 
-    List<String> getChosenPairs() {
-        SharedPreferences preferences = getSharedPreferences("pair_preferences", 0);
-        Map<String, Integer> pairs = (HashMap<String, Integer>) preferences.getAll();
-        List<String> result;
-
-        if (pairs.size() == 0) {
-            SharedPreferences.Editor editor = preferences.edit();
-            for (int i = 0; i < DEFAULT_PAIRS.size(); ++i) editor.putInt(DEFAULT_PAIRS.get(i), i);
-            editor.apply();
-            result = DEFAULT_PAIRS;
-        } else {
-            String[] result_arr = new String[pairs.size()];
-            for (Map.Entry<String, Integer> pair : pairs.entrySet())
-                result_arr[pair.getValue()] = pair.getKey();
-            result = Arrays.asList(result_arr);
-        }
-        return result;
+    public void addPair(View view) {
+        Intent intent = new Intent(this, AddPairActivity.class);
+        startActivity(intent);
     }
 }
