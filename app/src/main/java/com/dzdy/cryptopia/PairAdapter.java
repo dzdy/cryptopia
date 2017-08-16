@@ -9,11 +9,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
-class Adapter extends RecyclerView.Adapter<Adapter.PairViewHolder> {
+class PairAdapter extends RecyclerView.Adapter<PairAdapter.PairViewHolder> {
 
     private List<Pair> pairs;
 
-    Adapter(List<Pair> pairs) {
+    PairAdapter(List<Pair> pairs) {
         this.pairs = pairs;
     }
 

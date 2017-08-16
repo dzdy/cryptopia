@@ -30,7 +30,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public RequestQueue requestQueue;
 
-    private Adapter mAdapter;
+    private PairAdapter mPairAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,15 +83,15 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
         List<String> chosenPairs = StoredData.getChosenPairs(pair_prefs);
 
-        if (mAdapter == null) {
+        if (mPairAdapter == null) {
             RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerList);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(mLayoutManager);
 
             List<Pair> pairs = new ArrayList<>();
             for (String pair : chosenPairs) pairs.add(new Pair(pair, 0.0));
-            mAdapter = new Adapter(pairs);
-            mRecyclerView.setAdapter(mAdapter);
+            mPairAdapter = new PairAdapter(pairs);
+            mRecyclerView.setAdapter(mPairAdapter);
         }
 
         for (int i = 0; i < chosenPairs.size(); ++i) {
@@ -111,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        mAdapter.updatePairPrice(position, new Pair(pairName, askPrice));
-                        mAdapter.notifyItemChanged(position);
+                        mPairAdapter.updatePairPrice(position, new Pair(pairName, askPrice));
+                        mPairAdapter.notifyItemChanged(position);
                     }
                 }, new Response.ErrorListener() {
                     @Override
