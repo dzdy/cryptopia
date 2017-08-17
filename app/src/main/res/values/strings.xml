@@ -9,6 +9,8 @@
     <string name="default_price">0.00</string>
     <string name="pair_prefs_file">pair_preferences</string>
     <string name="network_err">Error connecting to Cryptopia</string>
-    <string name="currency_symbol">Curency Symbol</string>
+    <string name="currencies_updated">Currencies Updated</string>
+    <string name="currency_symbol">Currency Symbol</string>
     <string name="currency">Currency</string>
+    <string name="base_currency">Base Currency</string>
 </resources>
