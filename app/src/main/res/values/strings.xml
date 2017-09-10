@@ -13,4 +13,7 @@
     <string name="currency_symbol">Currency Symbol</string>
     <string name="currency">Currency</string>
     <string name="base_currency">Base Currency</string>
+    <string name="add">Add</string>
+    <string name="error_adding">Please select a valid new currency pair.</string>
+    <string name="add_successful">New currency added.</string>
 </resources>

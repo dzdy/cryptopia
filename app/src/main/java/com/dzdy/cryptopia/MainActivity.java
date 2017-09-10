@@ -55,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume(){
+        super.onResume();
+        refreshData();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -83,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
         List<String> chosenPairs = StoredData.getChosenPairs(pair_prefs);
 
-        if (mPairAdapter == null) {
+        if (mPairAdapter == null || mPairAdapter.getItemCount() < chosenPairs.size()) {
             RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerList);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -105,11 +111,12 @@ public class MainActivity extends AppCompatActivity {
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Double askPrice = null;
+                        Double askPrice;
                         try {
                             askPrice = response.getJSONObject("Data").getDouble("AskPrice");
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            return;
                         }
                         mPairAdapter.updatePairPrice(position, new Pair(pairName, askPrice));
                         mPairAdapter.notifyItemChanged(position);

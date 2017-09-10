@@ -29,4 +29,13 @@ class StoredData {
         }
         return result;
     }
+
+    static boolean addPair(String newPair, SharedPreferences preferences) {
+        if (preferences.contains(newPair))
+            return false;
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(newPair, getChosenPairs(preferences).size());
+        editor.apply();
+        return true;
+    }
 }

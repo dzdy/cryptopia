@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class AddPairActivity extends AppCompatActivity {
-    List<String> chosenPairs;
-    Map<String, Currency> allCurrencies;
+    private Currency selectedCurr, selectedBase;
+    private Map<String, Currency> allCurrencies;
     private RequestQueue requestQueue;
     private AutoCompleteTextView currencyDropdown;
     private AutoCompleteTextView baseCurrencyDropdown;
@@ -45,9 +45,6 @@ public class AddPairActivity extends AppCompatActivity {
         loadAllCurrencies();
         CharSequence err_msg = getString(R.string.currencies_updated);
         Toast.makeText(getApplicationContext(), err_msg, Toast.LENGTH_SHORT).show();
-
-        SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
-        chosenPairs = StoredData.getChosenPairs(pair_prefs);
 
         currencyDropdown = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
         baseCurrencyDropdown = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView2);
@@ -62,8 +59,8 @@ public class AddPairActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                populateBaseCurrencyDropdown(((Currency)
-                        adapterView.getItemAtPosition(i)).baseCurrencies);
+                selectedCurr = (Currency) adapterView.getItemAtPosition(i);
+                populateBaseCurrencyDropdown(selectedCurr.baseCurrencies);
             }
         });
         baseCurrencyDropdown.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -72,6 +69,8 @@ public class AddPairActivity extends AppCompatActivity {
                 InputMethodManager in = (InputMethodManager)
                         getSystemService(Context.INPUT_METHOD_SERVICE);
                 in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+
+                selectedBase = (Currency) adapterView.getItemAtPosition(i);
             }
         });
         currencyDropdown.requestFocus();
@@ -110,6 +109,21 @@ public class AddPairActivity extends AppCompatActivity {
         requestQueue.add(jsObjRequest);
     }
 
+    public void onAdd(View view) {
+        SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
+        String pairName = null;
+        try {
+            pairName = Pair.pairName(selectedBase.symbol, selectedCurr.symbol);
+        } catch (NullPointerException e) {
+            errorAdding();
+        }
+        if (StoredData.addPair(pairName, pair_prefs)) {
+            addSuccessful();
+        } else {
+            errorAdding();
+        }
+    }
+
     void populateCurrencyDropdown() {
         populateDropDown(new ArrayList<>(allCurrencies.values()), currencyDropdown);
     }
@@ -146,5 +160,16 @@ public class AddPairActivity extends AppCompatActivity {
         Currency currency = allCurrencies.get(name);
         currency.addBaseCurrency(new Currency(baseName, baseSymbol));
         allCurrencies.put(name, currency);
+    }
+
+    void errorAdding() {
+        CharSequence err_msg = getString(R.string.error_adding);
+        Toast.makeText(getApplicationContext(), err_msg, Toast.LENGTH_SHORT).show();
+    }
+
+    void addSuccessful() {
+        CharSequence err_msg = getString(R.string.add_successful);
+        Toast.makeText(getApplicationContext(), err_msg, Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

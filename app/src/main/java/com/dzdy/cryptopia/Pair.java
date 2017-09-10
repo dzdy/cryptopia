@@ -16,4 +16,8 @@ class Pair {
     Double getAskPrice() {
         return askPrice;
     }
+
+    public static String pairName(String base, String curr) {
+        return curr + "_" + base;
+    }
 }
