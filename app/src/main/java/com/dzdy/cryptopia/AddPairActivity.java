@@ -110,14 +110,14 @@ public class AddPairActivity extends AppCompatActivity {
     }
 
     public void onAdd(View view) {
-        SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
+        SharedPreferences pairPrefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
         String pairName = null;
         try {
             pairName = Pair.pairName(selectedBase.symbol, selectedCurr.symbol);
         } catch (NullPointerException e) {
             errorAdding();
         }
-        if (StoredData.addPair(pairName, pair_prefs)) {
+        if (StoredData.addPair(pairName, pairPrefs)) {
             addSuccessful();
         } else {
             errorAdding();
