@@ -10,7 +10,7 @@ import java.util.Map;
 
 class StoredData {
     private static final List<String> DEFAULT_PAIRS =
-            Collections.unmodifiableList(Arrays.asList("LTC_BTC", "ETH_BTC"));
+            Collections.unmodifiableList(Arrays.asList("ETH_BTC", "LTC_BTC"));
 
     static List<String> getChosenPairs(SharedPreferences preferences) {
         Map<String, Integer> pairs = (HashMap<String, Integer>) preferences.getAll();
@@ -33,8 +33,13 @@ class StoredData {
     static boolean addPair(String newPair, SharedPreferences preferences) {
         if (preferences.contains(newPair))
             return false;
+
+        ArrayList<String> pairs = new ArrayList<>(getChosenPairs(preferences));
+        pairs.add(pairs.size(), newPair);
+        Collections.sort(pairs);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(newPair, getChosenPairs(preferences).size());
+        for (int i = 0; i < pairs.size(); ++i)
+            editor.putInt(pairs.get(i), i);
         editor.apply();
         return true;
     }
