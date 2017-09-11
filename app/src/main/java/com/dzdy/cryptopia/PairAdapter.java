@@ -39,6 +39,12 @@ class PairAdapter extends RecyclerView.Adapter<PairAdapter.PairViewHolder> {
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    void removeItem(int position){
+        pairs.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, pairs.size());
+    }
+
     static class PairViewHolder extends RecyclerView.ViewHolder {
         CardView cv;
         TextView pairName;

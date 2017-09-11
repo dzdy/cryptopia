@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public RequestQueue requestQueue;
 
     private PairAdapter mPairAdapter;
+    private ArrayList<String> chosenPairs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +53,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         requestQueue = Volley.newRequestQueue(this);
+        loadChosenPairs();
         refreshData();
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
+        loadChosenPairs();
         refreshData();
     }
 
@@ -86,9 +90,6 @@ public class MainActivity extends AppCompatActivity {
         final TextView timeTextView = (TextView) findViewById(R.id.timeTextView);
         timeTextView.setText(getString(R.string.time_prefix, new java.util.Date().toString()));
 
-        SharedPreferences pair_prefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
-        List<String> chosenPairs = StoredData.getChosenPairs(pair_prefs);
-
         if (mPairAdapter == null || mPairAdapter.getItemCount() < chosenPairs.size()) {
             RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerList);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
@@ -98,11 +99,20 @@ public class MainActivity extends AppCompatActivity {
             for (String pair : chosenPairs) pairs.add(new Pair(pair, 0.0));
             mPairAdapter = new PairAdapter(pairs);
             mRecyclerView.setAdapter(mPairAdapter);
+
+            // Swipe to delete
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+            itemTouchHelper.attachToRecyclerView(mRecyclerView);
         }
 
         for (int i = 0; i < chosenPairs.size(); ++i) {
             updatePrice(i, chosenPairs.get(i));
         }
+    }
+
+    private void loadChosenPairs() {
+        SharedPreferences pairPrefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
+        chosenPairs = new ArrayList<>(StoredData.getChosenPairs(pairPrefs));
     }
 
     private void updatePrice(final int position, final String pairName) {
@@ -136,4 +146,21 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AddPairActivity.class);
         startActivity(intent);
     }
+
+    ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            final int position = viewHolder.getAdapterPosition();
+            SharedPreferences pairPrefs = getSharedPreferences(getString(R.string.pair_prefs_file), 0);
+            StoredData.delPair(position, pairPrefs);
+            Toast.makeText(MainActivity.this, R.string.remove_successful, Toast.LENGTH_SHORT).show();
+            mPairAdapter.removeItem(position);
+        }
+    };
 }

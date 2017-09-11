@@ -16,4 +16,5 @@
     <string name="add">Add</string>
     <string name="error_adding">Please select a valid new currency pair.</string>
     <string name="add_successful">New currency added.</string>
+    <string name="remove_successful">Currency removed.</string>
 </resources>
